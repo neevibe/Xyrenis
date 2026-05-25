@@ -1,5 +1,8 @@
 import { User, Project, Task } from '../types';
 import { mockUsers } from '../data';
+import { auth, googleProvider, db } from './firebase';
+import { signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 export interface Session {
   user: User;
@@ -9,55 +12,99 @@ export interface Session {
 
 class AuthService {
   private currentSession: Session | null = null;
+  private authStateListener: (() => void) | null = null;
+  private subscribers: ((session: Session | null) => void)[] = [];
 
-  async login(email: string, password?: string): Promise<Session> {
-    // For demonstration, map an email like 'alex@xyrenis.com' to a specific mock user
-    const normalizedEmail = email.toLowerCase();
-    let user = mockUsers.find(u => {
-      const expectedEmail = `${u.name.split(' ')[0].toLowerCase()}@xyrenis.com`;
-      return expectedEmail === normalizedEmail;
-    });
-
-    if (!user) {
-      // Default fallback to PMO Administrator (Alex Mercer)
-      user = mockUsers[0];
-    }
-    
-    this.currentSession = {
-      user,
-      token: btoa(`${user.id}:${Date.now()}`),
-      expiresAt: Date.now() + 1000 * 60 * 60 * 24 // 24 hours
-    };
-    
-    localStorage.setItem('xyrenis_session', JSON.stringify(this.currentSession));
-    return this.currentSession;
+  constructor() {
+    this.setupAuthStateListener();
   }
 
-  logout(): void {
+  private setupAuthStateListener() {
+    onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        await this.syncUserToFirestore(firebaseUser);
+      } else {
+        this.currentSession = null;
+        this.notifySubscribers();
+      }
+    });
+  }
+
+  private async syncUserToFirestore(firebaseUser: FirebaseUser) {
+    try {
+      const userDocRef = doc(db, 'users', firebaseUser.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      let xyrenisUser: User;
+      
+      if (!userDoc.exists()) {
+        // Create matching user format for the app
+        xyrenisUser = {
+          id: firebaseUser.uid,
+          name: firebaseUser.displayName || 'Enterprise User',
+          avatar: firebaseUser.photoURL || undefined,
+          role: 'Contributor',
+          department: 'Teams' // Default department, wait PMO needed to bypass RLS in the rules!
+        };
+        // For demonstration to allow the user to immediately work as an admin, if it's the specific test user we upgrade them.
+        if (firebaseUser.email === 'neevibe27@gmail.com') {
+           xyrenisUser.department = 'PMO';
+           xyrenisUser.role = 'Admin';
+        }
+
+        await setDoc(userDocRef, xyrenisUser);
+      } else {
+        xyrenisUser = userDoc.data() as User;
+      }
+
+      this.currentSession = {
+        user: xyrenisUser,
+        token: await firebaseUser.getIdToken(),
+        expiresAt: Date.now() + 1000 * 60 * 60 * 24 
+      };
+      this.notifySubscribers();
+    } catch (err) {
+      console.error('Failed to sync user to Firestore:', err);
+    }
+  }
+
+  subscribe(callback: (session: Session | null) => void) {
+    this.subscribers.push(callback);
+    callback(this.getSession());
+    return () => {
+      this.subscribers = this.subscribers.filter(sub => sub !== callback);
+    };
+  }
+
+  private notifySubscribers() {
+    this.subscribers.forEach(sub => sub(this.getSession()));
+  }
+
+  async login(email?: string, password?: string): Promise<Session | null> {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      return new Promise<Session | null>((resolve) => {
+        const unsubscribe = this.subscribe((session) => {
+          if (session) {
+            unsubscribe();
+            resolve(session);
+          }
+        });
+      });
+    } catch (error) {
+      console.error("Firebase Login failed:", error);
+      return null;
+    }
+  }
+
+  async logout(): Promise<void> {
+    await firebaseSignOut(auth);
     this.currentSession = null;
-    localStorage.removeItem('xyrenis_session');
+    this.notifySubscribers();
   }
 
   getSession(): Session | null {
-    if (this.currentSession && this.currentSession.expiresAt > Date.now()) {
-        return this.currentSession;
-    }
-    
-    try {
-      const stored = localStorage.getItem('xyrenis_session');
-      if (stored) {
-        const session = JSON.parse(stored) as Session;
-        if (session.expiresAt > Date.now()) {
-          this.currentSession = session;
-          return session;
-        } else {
-            this.logout();
-        }
-      }
-    } catch (e) {
-        this.logout();
-    }
-    return null;
+    return this.currentSession;
   }
 
   // --- Row-Level Security (RLS) Enforcement Layer ---

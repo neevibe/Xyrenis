@@ -19,13 +19,14 @@ export default function App() {
   const [currentView, setCurrentView] = useState<ViewState>('dashboard');
 
   useEffect(() => {
-    if (authService.getSession()) {
-      setIsAuthenticated(true);
-    }
+    const unsubscribe = authService.subscribe((session) => {
+      setIsAuthenticated(!!session);
+    });
+    return () => unsubscribe();
   }, []);
 
   if (!isAuthenticated) {
-    return <LandingView onLogin={() => setIsAuthenticated(true)} />;
+    return <LandingView onLogin={() => {}} />;
   }
 
   return (

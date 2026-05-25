@@ -1,11 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { mockTasks, mockUsers } from "../data";
-import { Status } from "../types";
+import { Status, Task } from "../types";
 import { MoreHorizontal, MessageSquare, Paperclip, AlertCircle, Plus } from "lucide-react";
+import { AddTaskModal } from "../components/AddTaskModal";
+import { TaskDetailsModal } from "../components/TaskDetailsModal";
 
 const COLUMNS: Status[] = ['Backlog', 'Planned', 'In Progress', 'Blocked', 'Review', 'Completed'];
 
 export function KanbanView() {
+  const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<string>('Backlog');
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+
   return (
     <div className="h-full flex flex-col space-y-6">
       <div className="flex items-center justify-between">
@@ -39,7 +45,11 @@ export function KanbanView() {
               
               <div className="flex-1 p-3 space-y-3 overflow-y-auto min-h-[500px]">
                 {columnTasks.map(task => (
-                  <div key={task.id} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+                  <div 
+                    key={task.id} 
+                    onClick={() => setSelectedTask(task)}
+                    className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
+                  >
                     <div className="flex items-start justify-between mb-2">
                       <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-sm
                         ${task.priority === 'Critical' ? 'bg-red-100 text-red-700' : 
@@ -83,7 +93,9 @@ export function KanbanView() {
                   </div>
                 ))}
 
-                <button className="w-full py-2 flex items-center justify-center gap-2 text-sm text-gray-500 font-medium hover:bg-gray-100 rounded-lg transition-colors border border-dashed border-gray-300">
+                <button 
+                  onClick={() => { setSelectedStatus(column); setIsAddTaskOpen(true); }}
+                  className="w-full py-2 flex items-center justify-center gap-2 text-sm text-gray-500 font-medium hover:bg-gray-100 rounded-lg transition-colors border border-dashed border-gray-300">
                   <Plus className="w-4 h-4" />
                   Add Task
                 </button>
@@ -92,6 +104,21 @@ export function KanbanView() {
           );
         })}
       </div>
+
+      {isAddTaskOpen && (
+        <AddTaskModal 
+          isOpen={isAddTaskOpen} 
+          onClose={() => setIsAddTaskOpen(false)} 
+          defaultStatus={selectedStatus} 
+        />
+      )}
+
+      {selectedTask && (
+        <TaskDetailsModal 
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+        />
+      )}
     </div>
   );
 }

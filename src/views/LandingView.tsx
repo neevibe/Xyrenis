@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Database, LayoutDashboard, ArrowRight, Loader2 } from 'lucide-react';
+import { Star, ArrowRight, Activity, Box, Cloud, Database, Layers } from 'lucide-react';
 import { authService } from '../lib/auth';
 
 interface LandingViewProps {
@@ -7,125 +7,98 @@ interface LandingViewProps {
 }
 
 export function LandingView({ onLogin }: LandingViewProps) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if(email && password) {
-      setIsLoading(true);
-      await authService.login(email, password);
-      onLogin();
-    }
+  const handleLogin = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setIsLoading(true);
+    // Real flow uses Google Auth for full-stack, but here we'll simulate demo.
+    await authService.login('demo@xyrenis.com', 'password123');
+    onLogin();
   }
 
   return (
-    <div className="min-h-screen bg-[#F0F2F5] flex flex-col md:flex-row font-sans">
-      {/* Left side - Branding */}
-      <div className="flex-1 bg-[#1A1C1E] text-white p-8 md:p-16 flex flex-col justify-between relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-           <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] bg-[#714B67]/30 rounded-full blur-[120px]"></div>
-           <div className="absolute bottom-[10%] -right-[10%] w-[60%] h-[60%] bg-[#00A09D]/20 rounded-full blur-[100px]"></div>
-        </div>
-        
-        <div className="z-10 relative">
-          <div className="flex items-center gap-3 text-white font-bold text-2xl tracking-tight mb-20">
-            <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center">
-              <div className="w-6 h-6 border-[3px] border-[#714B67] rounded-md"></div>
-            </div>
-            Xyrenis
-          </div>
-          
-          <h1 className="text-5xl font-display font-bold leading-tight mb-6">
-            Intelligent <br/>
-            Project <br/>
-            Orchestration.
-          </h1>
-          <p className="text-lg text-gray-400 max-w-md mb-12">
-            The centralized execution platform for enterprises. Seamlessly syncs with Microsoft Planner to provide advanced task fragmentation, AI-powered insights, and real-time visibility.
-          </p>
-          
-          <div className="space-y-6">
-            <div className="flex items-start gap-4">
-              <div className="bg-[#714B67]/20 p-3 rounded-lg border border-[#714B67]/30">
-                <LayoutDashboard className="w-6 h-6 text-purple-400" />
-              </div>
-              <div>
-                <h3 className="font-bold text-white">Enterprise Architecture</h3>
-                <p className="text-sm text-gray-400 mt-1">Modular workspaces with complete PMO visibility.</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="bg-[#00A09D]/20 p-3 rounded-lg border border-[#00A09D]/30">
-                <Database className="w-6 h-6 text-teal-400" />
-              </div>
-              <div>
-                <h3 className="font-bold text-white">MS Planner Integration</h3>
-                <p className="text-sm text-gray-400 mt-1">Deep two-way sync with your existing Microsoft Graph data.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="z-10 relative text-sm font-medium text-gray-500 mt-20">
-          © {new Date().getFullYear()} Xyrenis Inc. Enterprise SaaS.
-        </div>
+    <div className="min-h-screen bg-white relative overflow-hidden font-sans">
+      {/* Subtle layered gradient glow in the top-left */}
+      <div className="absolute top-0 left-0 w-full h-[800px] overflow-hidden pointer-events-none z-0">
+        <div className="absolute -top-[10%] -left-[10%] w-[600px] h-[600px] bg-[#60B1FF] rounded-full blur-[150px] opacity-20"></div>
+        <div className="absolute top-[5%] left-[5%] w-[400px] h-[400px] bg-[#319AFF] rounded-full blur-[120px] opacity-15"></div>
       </div>
-      
-      {/* Right side - Login */}
-      <div className="w-full md:w-[500px] lg:w-[600px] bg-white flex flex-col justify-center items-center p-8 md:p-12 shadow-[0_0_40px_rgba(0,0,0,0.05)] z-10">
-        <div className="w-full max-w-sm">
-          <div className="mb-10 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h2>
-            <p className="text-sm text-gray-500">Sign in to your Xyrenis workspace.</p>
+
+      <div className="max-w-[1600px] mx-auto relative z-10 antialiased">
+        
+        {/* The "Strong Liquid Glass" Navbar */}
+        <nav className="sticky top-[30px] mx-auto w-fit flex items-center gap-8 px-6 py-3 rounded-[16px] backdrop-blur-[50px] bg-white/30 border border-black/10 shadow-[inset_0px_4px_4px_0px_rgba(255,255,255,0.25),0_10px_30px_rgba(0,0,0,0.05)] z-50">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-[8px] flex items-center justify-center bg-white/10 backdrop-blur-md border border-gray-200">
+              <div className="w-4 h-4 border-[2px] border-blue-600 rounded-sm"></div>
+            </div>
+            <span className="font-display font-bold text-xl text-gray-900 tracking-tight">Xyrenis</span>
           </div>
           
-          <form className="space-y-6" onSubmit={handleLogin}>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Work Email</label>
-              <input 
-                type="email" 
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00A09D]/20 focus:border-[#00A09D] transition-all"
-                placeholder="you@company.com"
-              />
-            </div>
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <label className="block text-sm font-semibold text-gray-700">Password</label>
-                <a href="#" className="text-xs font-semibold text-[#00A09D] hover:text-[#008a87]">Forgot password?</a>
-              </div>
-              <input 
-                type="password" 
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00A09D]/20 focus:border-[#00A09D] transition-all"
-                placeholder="••••••••"
-              />
-            </div>
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
+            <a href="#" className="hover:text-gray-900 transition-colors">Home</a>
+            <a href="#" className="hover:text-gray-900 transition-colors">Features</a>
+            <a href="#" className="hover:text-gray-900 transition-colors">Company</a>
+            <a href="#" className="hover:text-gray-900 transition-colors">Pricing</a>
+          </div>
+
+          <button 
+            onClick={() => handleLogin()}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-[12px] bg-white/50 backdrop-blur-md border border-white/60 text-sm font-semibold text-gray-900 shadow-[inset_0px_2px_4px_0px_rgba(255,255,255,1),0_2px_10px_rgba(0,0,0,0.05)] hover:bg-white/70 transition-all group"
+          >
+            {isLoading ? <span className="animate-pulse">Loading...</span> : 'SignUp'}
+            <ArrowRight className="w-4 h-4 opacity-70 group-hover:translate-x-0.5 transition-transform" />
+          </button>
+        </nav>
+
+        {/* Hero Section */}
+        <div className="flex flex-col lg:flex-row items-center justify-between pt-32 lg:pt-40 pb-20 px-6 lg:px-16 gap-12">
+          
+          {/* Hero Content (Left) */}
+          <div className="flex-1 max-w-2xl text-center lg:text-left flex flex-col items-center lg:items-start z-20">
             
+            {/* Badge */}
+            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-blue-50/50 border border-blue-100 shadow-sm mb-8">
+              <span className="text-sm font-bold text-blue-600 tracking-wide uppercase">Xyrenis Advanced Solution</span>
+            </div>
+
+            <h1 className="font-display font-bold text-[50px] lg:text-[75px] leading-[1.05] tracking-[rgba(-2px)] text-black mb-6" style={{ letterSpacing: '-2px' }}>
+              Work smarter,<br className="hidden lg:block"/> achieve faster
+            </h1>
+            
+            <p className="font-sans text-[18px] tracking-[-1px] text-gray-500 leading-relaxed mb-10 max-w-xl">
+              Effortlessly manage your projects, collaborate with your team, and achieve your goals with our intuitive task management tool.
+            </p>
+
             <button 
-              type="submit" 
-              disabled={isLoading}
-              className="w-full py-3 bg-[#00A09D] text-white rounded-lg font-bold shadow-sm hover:bg-[#008a87] transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
+              onClick={() => handleLogin()}
+              className="flex items-center gap-4 px-8 py-4 rounded-[16px] bg-[rgba(0,132,255,0.8)] backdrop-blur-[2px] text-white font-medium text-lg leading-none shadow-[inset_0px_4px_4px_0px_rgba(255,255,255,0.35),0_12px_30px_rgba(0,132,255,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all group"
             >
-              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><span className="mr-1">Sign In</span> <ArrowRight className="w-4 h-4" /></>}
+              Get Started Now
+              <div className="bg-white/20 p-1.5 rounded-full backdrop-blur-sm group-hover:bg-white/30 transition-colors">
+                <ArrowRight className="w-5 h-5 text-white" />
+              </div>
             </button>
-          </form>
-          
-          <div className="mt-8 flex items-center justify-center gap-2 text-xs font-medium text-gray-500 bg-[#F0F2F5]/80 p-3 rounded-lg border border-gray-100">
-            <ShieldCheck className="w-4 h-4 text-green-600" />
-            Protected by Enterprise Row-Level Security (RLS)
           </div>
-          
-          <div className="mt-12 text-center text-sm text-gray-500">
-            Don't have an account? <a href="#" className="font-bold text-[#714B67] hover:underline">Contact Sales</a>
+
+          {/* Uploaded Animated Video (Right) */}
+          <div className="flex-1 w-full max-w-[600px] lg:max-w-none relative flex justify-center items-center z-10 pointer-events-none">
+            <div className="relative w-full max-w-xl mx-auto flex items-center justify-center">
+               <video 
+                 autoPlay 
+                 loop 
+                 muted 
+                 playsInline 
+                 style={{ mixBlendMode: 'multiply', filter: 'contrast(1.2) brightness(1.2)' }}
+                 className="w-full h-auto object-contain select-none mix-blend-multiply"
+                 src="/video.mp4"
+               >
+               </video>
+            </div>
           </div>
         </div>
+
       </div>
     </div>
   );

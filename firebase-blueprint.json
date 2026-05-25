@@ -1,0 +1,65 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile containing RBAC roles",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "avatar": { "type": "string" },
+        "role": { "type": "string" },
+        "department": { "type": "string" }
+      },
+      "required": ["id", "name", "role", "department"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "A project containing tasks",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["Planning", "Active", "At Risk", "Completed"] },
+        "progress": { "type": "number", "minimum": 0, "maximum": 100 },
+        "ownerId": { "type": "string" },
+        "teamIds": { "type": "array", "items": { "type": "string" } },
+        "startDate": { "type": "string" },
+        "dueDate": { "type": "string" }
+      },
+      "required": ["id", "name", "description", "status", "progress", "ownerId", "teamIds", "startDate", "dueDate"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "A task belonging to a project",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "projectId": { "type": "string" },
+        "status": { "type": "string", "enum": ["Backlog", "Planned", "In Progress", "Blocked", "Review", "Completed"] },
+        "priority": { "type": "string", "enum": ["Low", "Medium", "High", "Critical"] },
+        "assigneeIds": { "type": "array", "items": { "type": "string" } },
+        "dueDate": { "type": "string" },
+        "progress": { "type": "number", "minimum": 0, "maximum": 100 },
+        "dependencies": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["id", "title", "projectId", "status", "priority", "assigneeIds", "dueDate", "progress"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profile collection"
+    },
+    "projects/{projectId}": {
+      "schema": { "$ref": "#/entities/Project" },
+      "description": "Projects collection containing milestone details"
+    },
+    "projects/{projectId}/tasks/{taskId}": {
+      "schema": { "$ref": "#/entities/Task" },
+      "description": "Tasks within a project"
+    }
+  }
+}

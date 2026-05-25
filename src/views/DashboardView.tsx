@@ -2,6 +2,7 @@ import React from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { ArrowUpRight, Clock, AlertCircle, CheckCircle2 } from "lucide-react";
 import { mockProjects, mockTasks } from "../data";
+import { ProjectDashboard } from "../components/ProjectDashboard";
 
 const performanceData = [
   { name: 'Jan', completed: 40, delayed: 24 },
@@ -110,6 +111,9 @@ export function DashboardView() {
           </div>
         </div>
       </div>
+
+      {/* Project-Specific Data Grid */}
+      <ProjectDashboard />
     </div>
   );
 }

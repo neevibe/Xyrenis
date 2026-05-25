@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { mockProjects } from "../data";
 import { MoreHorizontal, Plus, Filter, Calendar } from "lucide-react";
+import { AddTaskModal } from "../components/AddTaskModal";
 
 export function ProjectsView() {
+  const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -14,6 +17,12 @@ export function ProjectsView() {
           <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-sm font-medium text-gray-700 rounded-lg shadow-sm hover:bg-gray-50 transition-colors">
             <Filter className="w-4 h-4" />
             Filters
+          </button>
+          <button 
+            onClick={() => setIsAddTaskOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-sm font-medium text-gray-700 rounded-lg shadow-sm hover:bg-gray-50 transition-colors">
+            <Plus className="w-4 h-4" />
+            Add Task
           </button>
           <button className="flex items-center gap-2 px-4 py-2 bg-[#00A09D] text-white text-sm font-medium rounded-lg shadow-sm hover:bg-[#008a87] transition-colors">
             <Plus className="w-4 h-4" />
@@ -90,6 +99,13 @@ export function ProjectsView() {
           </tbody>
         </table>
       </div>
+
+      {isAddTaskOpen && (
+        <AddTaskModal 
+          isOpen={isAddTaskOpen} 
+          onClose={() => setIsAddTaskOpen(false)} 
+        />
+      )}
     </div>
   );
 }
